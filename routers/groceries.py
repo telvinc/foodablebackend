@@ -21,6 +21,7 @@ def create_grocery(item: GroceryCreate, db: Session = Depends(get_db)):
     db.refresh(db_item)
     return db_item
 
+
 @router.get("/", response_model=List[Grocery])
 def list_groceries(db: Session = Depends(get_db)):
     return db.query(GroceryItem).all()
