@@ -1,3 +1,6 @@
+# Ignore frontend repo
+foodable-frontend/
+
 # Python
 venv/
 __pycache__/
