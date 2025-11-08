@@ -32,3 +32,13 @@ def get_grocery(grocery_id: int, db: Session = Depends(get_db)):
     if not item:
         raise HTTPException(status_code=404, detail="Grocery item not found")
     return item
+
+@router.delete("/{grocery_id}", status_code=204)
+def delete_grocery(grocery_id: int, db: Session = Depends(get_db)):
+    item = db.query(GroceryItem).filter(GroceryItem.id == grocery_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Grocery item not found")
+    db.delete(item)
+    db.commit()
+    return {"detail": "Deleted"}
+
