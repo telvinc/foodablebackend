@@ -1,3 +1,4 @@
+from typing import List, Optional
 from pydantic import BaseModel
 
 class GroceryBase(BaseModel):
@@ -10,6 +11,21 @@ class GroceryCreate(GroceryBase):
     pass
 
 class Grocery(GroceryBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class RecipeBase(BaseModel):
+    name: str
+    ingredients: List[str]
+    instructions: Optional[str] = None
+
+class RecipeCreate(RecipeBase):
+    pass
+
+class Recipe(RecipeBase):
     id: int
 
     class Config:
