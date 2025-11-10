@@ -1,12 +1,7 @@
-from sqlalchemy.exc import IntegrityError
-from database import Base, engine, SessionLocal
+from sqlalchemy.orm import Session
 from models import GroceryItem, Recipe
 
-Base.metadata.create_all(bind=engine)
-
-db = SessionLocal()
-
-groceries = [
+GROCERIES = [
     {"name": "Banana", "category": "Fruit", "calories": 89, "protein": 1.1},
     {"name": "Chicken Breast", "category": "Protein", "calories": 165, "protein": 31.0},
     {"name": "Brown Rice", "category": "Grain", "calories": 123, "protein": 2.6},
@@ -14,7 +9,7 @@ groceries = [
     {"name": "Eggs", "category": "Protein", "calories": 155, "protein": 13.0},
 ]
 
-recipes = [
+RECIPES = [
     {
         "name": "Chicken and Rice Bowl",
         "ingredients": "Chicken Breast,Brown Rice,Broccoli",
@@ -25,27 +20,18 @@ recipes = [
         "ingredients": "Banana,Milk,Yogurt",
         "instructions": "Blend banana, milk, and yogurt until smooth.",
     },
-    {
-        "name": "Veggie Stir-Fry",
-        "ingredients": "Broccoli,Carrots,Soy Sauce",
-        "instructions": "Stir-fry veggies in a pan with soy sauce for 5-7 minutes.",
-    },
 ]
 
-def add_if_not_exists(model, unique_field, items):
-    for item in items:
-        existing = db.query(model).filter(getattr(model, unique_field) == item[unique_field]).first()
-        if not existing:
-            db.add(model(**item))
-            print(f"Added {item[unique_field]}")
-        else:
-            print(f"Skipped duplicate: {item[unique_field]}")
-
-try:
-    add_if_not_exists(GroceryItem, "name", groceries)
-    add_if_not_exists(Recipe, "name", recipes)
+def seed_groceries(db: Session) -> None:
+    """Seed groceries if the table is empty."""
+    if db.query(GroceryItem).count() > 0:
+        return
+    db.add_all([GroceryItem(**g) for g in GROCERIES])
     db.commit()
-except IntegrityError as e:
-    db.rollback()
-finally:
-    db.close()
+
+def seed_recipes(db: Session) -> None:
+    """Seed recipes if the table is empty."""
+    if db.query(Recipe).count() > 0:
+        return
+    db.add_all([Recipe(**r) for r in RECIPES])
+    db.commit()
