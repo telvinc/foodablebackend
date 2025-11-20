@@ -29,7 +29,7 @@ def _to_list(ingredients):
     return [p.strip() for p in s.split(",") if p.strip()]
 
 def _to_db_value(ingredients: List[str]) -> str:
-    """Store as a simple comma-separated string to match your current model."""
+    """Store as a simple comma-separated string to match current model."""
     return ",".join(ingredients)
 
 @router.get("/", response_model=List[RecipeSchema])
