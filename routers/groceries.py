@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -33,12 +33,24 @@ def get_grocery(grocery_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Grocery item not found")
     return item
 
-@router.delete("/{grocery_id}", status_code=204)
+@router.delete("/{grocery_id}", status_code=status.HTTP_200_OK)
 def delete_grocery(grocery_id: int, db: Session = Depends(get_db)):
-    item = db.query(GroceryItem).filter(GroceryItem.id == grocery_id).first()
+    item = db.get(GroceryItem, grocery_id)
     if not item:
         raise HTTPException(status_code=404, detail="Grocery item not found")
     db.delete(item)
     db.commit()
     return {"detail": "Deleted"}
+
+@router.put("/{grocery_id}", response_model=Grocery)
+def update_grocery(grocery_id: int, payload: GroceryCreate, db: Session = Depends(get_db)):
+    item = db.get(GroceryItem, grocery_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Grocery item not found")
+    for k, v in payload.model_dump().items():
+        setattr(item, k, v)
+    db.commit()
+    db.refresh(item)
+    return item
+
 

@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from routers import ai as ai_router
+
 from database import Base, engine, SessionLocal
 from routers import groceries
 try:
@@ -27,6 +29,8 @@ app.add_middleware(
 app.include_router(groceries.router)
 if HAS_RECIPES:
     app.include_router(recipes_router.router)
+
+app.include_router(ai_router.router)
 
 @app.on_event("startup")
 def on_startup():
