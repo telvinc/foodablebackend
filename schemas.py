@@ -30,3 +30,25 @@ class Recipe(RecipeBase):
 
     class Config:
         from_attributes = True
+
+class AISuggestionRequest(BaseModel):
+    query: str
+    dietary_restrictions: Optional[List[str]] = None
+    max_results: int = 5
+
+
+class AISuggestedItem(BaseModel):
+    name: str
+    description: Optional[str] = None
+    ingredients: List[str] = []
+    estimated_cost: Optional[float] = None
+    calories: Optional[float] = None
+    protein: Optional[float] = None
+
+
+class AISuggestionResponse(BaseModel):
+    original_query: str
+    suggestions: List[AISuggestedItem]
+
+    class Config:
+        from_attributes = True
