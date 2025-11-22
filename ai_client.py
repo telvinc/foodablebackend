@@ -3,7 +3,7 @@ import json
 from typing import List
 
 from dotenv import load_dotenv
-from openai import OpenAI, APIError
+from openai import OpenAI
 
 from schemas import (
     AISuggestionRequest,
@@ -27,12 +27,16 @@ def build_prompt(payload: AISuggestionRequest) -> str:
         )
 
     return (
-        "You are a meal planning assistant. "
-        "You MUST respond with STRICT JSON ONLY. "
-        "NO text before or after the JSON. NO commentary.\n\n"
+        "You are a recipe generator that ALWAYS matches the user's intent.\n"
+        "RULES:\n"
+        "- If the user asks for a dessert, return dessert recipes ONLY.\n"
+        "- If the user mentions a specific food (e.g., brownies), ALL returned items MUST be variants of that food.\n"
+        "- NEVER return savory meals unless the user explicitly asks.\n"
+        "- ALWAYS respect the user's dietary preferences.\n"
+        "- ALWAYS shape the output in the exact JSON structure below.\n\n"
         f"{restrictions}"
-        f"Generate {payload.max_results} healthy, affordable, high-protein meal prep ideas.\n\n"
-        "Each item MUST follow this EXACT structure:\n"
+        f"Generate {payload.max_results} recipe ideas based strictly on the user's query.\n\n"
+        "You MUST respond ONLY in this JSON format (no explanations):\n"
         "{\n"
         "  \"suggestions\": [\n"
         "    {\n"
@@ -77,7 +81,13 @@ def generate_ai_suggestions(payload: AISuggestionRequest) -> AISuggestionRespons
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[
-                {"role": "system", "content": "You output strictly formatted JSON."},
+                {
+                    "role": "system",
+                    "content": (
+                        "You output strictly valid JSON and ALWAYS match the user's recipe domain. "
+                        "Desserts must return desserts, savory stays savory."
+                    )
+                },
                 {"role": "user", "content": prompt},
             ],
             max_tokens=500,
