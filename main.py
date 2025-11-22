@@ -6,7 +6,7 @@ from routers import ai as ai_router
 from database import Base, engine, SessionLocal
 from routers import groceries
 try:
-    from routers import recipes as recipes_router  # noqa
+    from routers import recipes as recipes_router
     HAS_RECIPES = True
 except Exception:
     HAS_RECIPES = False
@@ -18,8 +18,7 @@ app = FastAPI(title="Foodable Backend", version="0.2.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
+        "*"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -29,7 +28,6 @@ app.add_middleware(
 app.include_router(groceries.router)
 if HAS_RECIPES:
     app.include_router(recipes_router.router)
-
 app.include_router(ai_router.router)
 
 @app.on_event("startup")
