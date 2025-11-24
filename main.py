@@ -13,6 +13,9 @@ except Exception:
 
 from seed_data import seed_groceries, seed_recipes
 
+from routers.debug import router as debug_router
+
+
 app = FastAPI(title="Foodable Backend", version="0.2.0")
 
 app.add_middleware(
@@ -24,6 +27,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(debug_router)
+
 
 app.include_router(groceries.router)
 if HAS_RECIPES:
