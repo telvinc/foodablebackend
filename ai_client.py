@@ -26,29 +26,50 @@ def build_prompt(payload: AISuggestionRequest) -> str:
             + ". "
         )
 
+    # SUPER-PROMPT with guaranteed full ingredient lists
     return (
-        "You are a recipe generator that ALWAYS matches the user's intent.\n"
-        "RULES:\n"
-        "- If the user asks for a dessert, return dessert recipes ONLY.\n"
-        "- If the user mentions a specific food (e.g., brownies), ALL returned items MUST be variants of that food.\n"
-        "- NEVER return savory meals unless the user explicitly asks.\n"
-        "- ALWAYS respect the user's dietary preferences.\n"
-        "- ALWAYS shape the output in the exact JSON structure below.\n\n"
-        f"{restrictions}"
-        f"Generate {payload.max_results} recipe ideas based strictly on the user's query.\n\n"
-        "You MUST respond ONLY in this JSON format (no explanations):\n"
+        "You are an AI assistant that generates structured meal suggestions in JSON.\n"
+        "Your job is to take the user query and return realistic, complete recipe ideas.\n"
+        "Follow these strict rules:\n\n"
+
+        "1. ALWAYS return JSON in exactly this structure:\n"
         "{\n"
         "  \"suggestions\": [\n"
         "    {\n"
-        "      \"name\": \"string\",\n"
-        "      \"description\": \"string\",\n"
-        "      \"ingredients\": [\"string\", \"string\"],\n"
-        "      \"estimated_cost\": float,\n"
-        "      \"calories\": float,\n"
-        "      \"protein\": float\n"
+        "      \"name\": \"\",\n"
+        "      \"description\": \"\",\n"
+        "      \"ingredients\": [],\n"
+        "      \"estimated_cost\": 0,\n"
+        "      \"calories\": 0,\n"
+        "      \"protein\": 0\n"
         "    }\n"
         "  ]\n"
         "}\n\n"
+
+        "2. INGREDIENT LIST RULES:\n"
+        "- MUST include ALL ingredients needed to actually cook the recipe.\n"
+        "- Include dry and wet ingredients.\n"
+        "- Include common staples: eggs, butter, oil, sugar, salt, baking powder, vanilla, etc.\n"
+        "- Minimum 5 ingredients unless the dish genuinely requires fewer.\n"
+        "- EACH ingredient must be specific and measurable (e.g., \"2 tbsp butter\").\n\n"
+
+        "3. NUTRITION:\n"
+        "- Provide simple, realistic estimates.\n"
+        "- Calories and protein should be approximate per-serving values.\n\n"
+
+        "4. COST:\n"
+        "- estimated_cost is the approximate cost of making the whole recipe.\n"
+        "- Round to a simple number.\n\n"
+
+        "5. RECIPE TYPE RULES:\n"
+        "- If the query is dessert-related, ALL results must be desserts.\n"
+        "- If the query names a food (e.g., brownies), ALL results must be variants of that food.\n"
+        "- Respect dietary restrictions.\n"
+        "- Never include commentary or extra fields.\n"
+        "- Output ONLY raw JSON.\n\n"
+
+        f"{restrictions}"
+        f"Generate exactly {payload.max_results} recipe suggestions.\n"
         f"User query: \"{payload.query}\""
     )
 
@@ -84,13 +105,14 @@ def generate_ai_suggestions(payload: AISuggestionRequest) -> AISuggestionRespons
                 {
                     "role": "system",
                     "content": (
-                        "You output strictly valid JSON and ALWAYS match the user's recipe domain. "
-                        "Desserts must return desserts, savory stays savory."
+                        "You output ONLY valid JSON. "
+                        "Never include commentary. "
+                        "Always produce complete ingredient lists."
                     )
                 },
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=500,
+            max_tokens=700,
             temperature=0.4,
         )
 
