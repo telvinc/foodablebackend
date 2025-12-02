@@ -19,10 +19,15 @@ class GroceryItem(Base):
     __tablename__ = "groceries"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+
     name = Column(String, nullable=False, index=True)
     category = Column(String, nullable=True)
     calories = Column(Float, nullable=True)
     protein = Column(Float, nullable=True)
+
+    user = relationship("User", back_populates="groceries")
+
 
 
 class Recipe(Base):
@@ -48,6 +53,8 @@ class User(Base):
         "Comment", back_populates="user", cascade="all, delete-orphan"
     )
     likes = relationship("Like", back_populates="user", cascade="all, delete-orphan")
+    groceries = relationship("GroceryItem", back_populates="user", cascade="all, delete-orphan")
+
 
 
 class Post(Base):

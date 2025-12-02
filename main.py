@@ -51,7 +51,7 @@ def on_startup():
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        seed_groceries(db)
+        # seed_groceries(db)
         seed_recipes(db)
     finally:
         db.close()
