@@ -199,3 +199,37 @@ def get_user_profile(user_id: int, db: Session = Depends(get_db)):
         posts=[_serialize_post(p) for p in posts],
         stats=stats,
     )
+
+@router.delete("/posts/{post_id}", status_code=200)
+def delete_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    post = db.get(PostModel, post_id)
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+
+    if post.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your post")
+
+    db.delete(post)
+    db.commit()
+    return {"detail": "Post deleted"}
+
+@router.delete("/comments/{comment_id}", status_code=200)
+def delete_comment(
+    comment_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    comment = db.get(CommentModel, comment_id)
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+
+    if comment.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not your comment")
+
+    db.delete(comment)
+    db.commit()
+    return {"detail": "Comment deleted"}

@@ -19,10 +19,15 @@ class GroceryItem(Base):
     __tablename__ = "groceries"
 
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+
     name = Column(String, nullable=False, index=True)
     category = Column(String, nullable=True)
     calories = Column(Float, nullable=True)
     protein = Column(Float, nullable=True)
+
+    user = relationship("User", back_populates="groceries")
+
 
 
 class Recipe(Base):
@@ -48,6 +53,15 @@ class User(Base):
         "Comment", back_populates="user", cascade="all, delete-orphan"
     )
     likes = relationship("Like", back_populates="user", cascade="all, delete-orphan")
+    groceries = relationship("GroceryItem", back_populates="user", cascade="all, delete-orphan")
+
+    saved_recipes = relationship(
+    "SavedRecipe",
+    back_populates="user",
+    cascade="all, delete-orphan"
+    )
+
+
 
 
 class Post(Base):
@@ -103,4 +117,20 @@ class Like(Base):
 
     __table_args__ = (
         UniqueConstraint("post_id", "user_id", name="uq_like_user_post"),
+    )
+
+class SavedRecipe(Base):
+    __tablename__ = "saved_recipes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), index=True, nullable=False)
+    recipe_id = Column(Integer, ForeignKey("recipes.id"), index=True, nullable=False)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    user = relationship("User", back_populates="saved_recipes")
+    recipe = relationship("Recipe")
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "recipe_id", name="uq_saved_recipe_user_recipe"),
     )
