@@ -158,3 +158,14 @@ class UserProfile(BaseModel):
     user: UserPublic
     posts: List[Post]
     stats: UserStats
+
+class SavedRecipeBase(BaseModel):
+    recipe_id: int
+
+class SavedRecipeResponse(BaseModel):
+    id: int
+    recipe_id: int
+    created_at: datetime  
+
+    class Config:
+        from_attributes = True
